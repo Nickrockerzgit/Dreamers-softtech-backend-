@@ -25,7 +25,7 @@ const app = express();
 // credentials: true → allows cookies to be sent cross-origin
 app.use(
   cors({
-    // origin: "http://localhost:5173",
+    origin: "http://localhost:5173",
     origin: "https://dreamers-softtech.vercel.app",
     credentials: true,
   }),
