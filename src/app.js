@@ -25,7 +25,7 @@ const app = express();
 // credentials: true → allows cookies to be sent cross-origin
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://dreamers-softtech.vercel.app"],
     credentials: true,
   }),
 );
@@ -49,10 +49,12 @@ app.use(
       dbRecordIdFunction: undefined,
     }),
     cookie: {
-      httpOnly: true, // JS cannot access cookie → more secure
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: "lax", // local development friendly
-      secure: false, // false for localhost, true for production
+      cookie: {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: "none",
+        secure: true,
+      },
     },
   }),
 );
