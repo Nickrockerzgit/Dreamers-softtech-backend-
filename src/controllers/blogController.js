@@ -3,11 +3,22 @@ const blogService = require("../services/blogService");
 // ── GET ALL BLOGS ──────────────────────────────────────────────
 const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await blogService.getAllBlogs();
+    let status = req.query.status;
+
+    // If NOT logged in (visitor), strictly show only "published"
+    if (!req.session || !req.session.adminId) {
+      status = "published";
+    } else {
+      // If logged in (admin), "all" means no status filter
+      if (status === "all") status = undefined;
+    }
+
+    const blogs = await blogService.getAllBlogs(status);
+    const parsed = blogs.map(parseBlog);
     res.status(200).json({
       success: true,
-      count: blogs.length,
-      data: blogs,
+      count: parsed.length,
+      data: parsed,
     });
   } catch (error) {
     res.status(500).json({
@@ -32,7 +43,7 @@ const getBlogById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: blog,
+      data: parseBlog(blog),
     });
   } catch (error) {
     res.status(500).json({
@@ -57,7 +68,7 @@ const getBlogBySlug = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: blog,
+      data: parseBlog(blog),
     });
   } catch (error) {
     res.status(500).json({
@@ -96,7 +107,7 @@ const createBlog = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Blog created successfully",
-      data: blog,
+      data: parseBlog(blog),
     });
   } catch (error) {
     // duplicate slug error
@@ -131,7 +142,7 @@ const updateBlog = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Blog updated successfully",
-      data: blog,
+      data: parseBlog(blog),
     });
   } catch (error) {
     res.status(500).json({
@@ -139,6 +150,28 @@ const updateBlog = async (req, res) => {
       message: "Error updating blog",
       error: error.message,
     });
+  }
+};
+
+// ── INCREMENT VIEWS ────────────────────────────────────────────
+const incrementViews = async (req, res) => {
+  try {
+    const blog = await blogService.getBlogBySlug(req.params.slug);
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+    const updated = await blogService.incrementViews(req.params.slug);
+    res.status(200).json({ success: true, views: updated.views });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error updating views",
+        error: error.message,
+      });
   }
 };
 
@@ -169,6 +202,21 @@ const deleteBlog = async (req, res) => {
   }
 };
 
+// ── HELPERS ────────────────────────────────────────────────────
+const parseBlog = (blog) => {
+  if (!blog) return blog;
+  let parsedTags = [];
+  try {
+    parsedTags = blog.tags ? JSON.parse(blog.tags) : [];
+  } catch {
+    parsedTags = [];
+  }
+  return {
+    ...blog,
+    tags: parsedTags,
+  };
+};
+
 module.exports = {
   getAllBlogs,
   getBlogById,
@@ -176,4 +224,5 @@ module.exports = {
   createBlog,
   updateBlog,
   deleteBlog,
+  incrementViews,
 };

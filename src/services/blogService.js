@@ -2,8 +2,13 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // ── GET ALL BLOGS ──────────────────────────────────────────────
-const getAllBlogs = async () => {
+const getAllBlogs = async (status) => {
+  const where = {};
+  if (status) {
+    where.status = status;
+  }
   return await prisma.blog.findMany({
+    where,
     orderBy: { createdAt: "desc" },
   });
 };
@@ -34,15 +39,29 @@ const createBlog = async (data) => {
       content: data.content,
       coverImage: data.coverImage || null,
       status: data.status || "draft",
+      tags: data.tags ? JSON.stringify(data.tags) : "[]",
     },
   });
 };
 
 // ── UPDATE BLOG ────────────────────────────────────────────────
 const updateBlog = async (id, data) => {
+  const updateData = { ...data };
+  if (updateData.tags !== undefined) {
+    updateData.tags = JSON.stringify(updateData.tags);
+  }
+
   return await prisma.blog.update({
     where: { id },
-    data,
+    data: updateData,
+  });
+};
+
+// ── INCREMENT VIEWS ────────────────────────────────────────────
+const incrementViews = async (slug) => {
+  return await prisma.blog.update({
+    where: { slug },
+    data: { views: { increment: 1 } },
   });
 };
 
@@ -60,4 +79,5 @@ module.exports = {
   createBlog,
   updateBlog,
   deleteBlog,
+  incrementViews,
 };

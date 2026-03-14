@@ -1,6 +1,21 @@
-node_modules
-# Keep environment variables out of version control
-.env
+# node_modules
+# # Keep environment variables out of version control
+# .env
 
+# /src/generated/prisma
+# prisma/migrations
+
+# PROJECT_CONTEXT.md
+#         prisma/reseed.js
+#         prisma/seedAdmin.js
+#         prisma/seedPortfolio.js
+#         prisma/seedTestimonials.js
+#         uploads/
+#         \
+
+
+node_modules
+.env
+uploads/
 /src/generated/prisma
-prisma/migrations
+PROJECT_CONTEXT.md

@@ -7,14 +7,17 @@ const {
   createBlog,
   updateBlog,
   deleteBlog,
+  incrementViews,
 } = require("../controllers/blogController");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 // ── BLOG ROUTES ────────────────────────────────────────────────
 router.get("/", getAllBlogs);
 router.get("/:id", getBlogById);
 router.get("/slug/:slug", getBlogBySlug);
-router.post("/", createBlog);
-router.put("/:id", updateBlog);
-router.delete("/:id", deleteBlog);
+router.post("/", isAuthenticated, createBlog);
+router.put("/:id", isAuthenticated, updateBlog);
+router.delete("/:id", isAuthenticated, deleteBlog);
+router.patch("/slug/:slug/view", incrementViews);
 
 module.exports = router;

@@ -23,7 +23,116 @@ model Blog {
   content   String   @db.LongText
   coverImage String?
   status    String   @default("draft")
+  tags      String?  @db.Text
   views     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id        String    @id @default(uuid())
+  name      String?
+  email     String    @unique
+  password  String
+  role      String    @default("admin")
+  status String @default("pending")
+  emailVerified Boolean @default(false)
+  twoFactorSecret   String?
+  twoFactorEnabled  Boolean  @default(false)
+  otpCode           String?  
+  otpExpiresAt      DateTime? 
+  createdAt DateTime  @default(now())
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.Text
+  expiresAt DateTime
+}
+
+model Portfolio {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  category    String
+  overview    String   @db.Text
+  description String   @db.LongText
+  techStack   String   @db.Text    // stored as JSON string → ["React", "Node.js"]
+  clientName  String
+  clientInfo  String   @db.Text
+  keyFeatures String   @db.LongText // stored as JSON string → ["Feature 1", "Feature 2"]
+  heroImage   String?              // single main image path
+  images      String   @db.LongText // stored as JSON string → ["/uploads/img1.png"]
+  status      String   @default("draft") // "draft" | "published"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  phone      String
+  subject    String
+  message    String   @db.Text
+  status     String   @default("unread") // "unread" | "read"
+  receivedAt DateTime @default(now())
+}
+
+model SiteStats {
+  id                Int      @id @default(autoincrement())
+  projectsCompleted Int      @default(0)
+  happyClients      Int      @default(0)
+  yearsExperience   Int      @default(1)
+  satisfactionRate  Int      @default(98)
+  teamMembersCount  Int      @default(0)
+  technologiesCount Int      @default(0)
+  updatedAt         DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  company   String
+  role      String
+  avatar    String?              // initials e.g. "RV" (used if no image)
+  color     String               // hex color e.g. "#C89A3D"
+  avatarImage String?            // uploaded image URL
+  rating    Int      @default(5)
+  text      String   @db.Text
+  status    String   @default("published") // "published" | "draft"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VisitorLog {
+  id        String   @id @default(uuid())
+  month     String   // "Jan", "Feb" etc
+  year      Int
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([month, year])
+}
+
+model Proposal {
+  id           String   @id @default(uuid())
+  fullName     String
+  email        String
+  phone        String?
+  company      String?
+  projectType  String
+  budgetRange  String
+  timeline     String
+  description  String   @db.Text
+
+  source       String   @default("client") // "client" (from web) | "admin" (manual)
+  status       String   @default("pending") // "pending" | "sent" | "confirmed" | "rejected"
+  magicToken   String?  @unique @default(uuid())
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sentAt       DateTime?
+  confirmedAt  DateTime?
 }
